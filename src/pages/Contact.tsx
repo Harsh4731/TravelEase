@@ -38,20 +38,20 @@ const Contact = () => {
     {
       icon: Phone,
       title: "Phone",
-      details: "+1 (555) 123-4567",
+      details: "+91 97171 24731",
       subdetails: "Mon-Fri from 8am to 6pm",
     },
     {
       icon: Mail,
       title: "Email",
-      details: "info@travelease.com",
+      details: "harsh.help@travelease.com",
       subdetails: "Reply within 24 hours",
     },
     {
       icon: MapPin,
       title: "Office",
-      details: "123 Travel Street",
-      subdetails: "Adventure City, AC 12345",
+      details: "New Delhi",
+      subdetails: "India",
     },
     {
       icon: Clock,
