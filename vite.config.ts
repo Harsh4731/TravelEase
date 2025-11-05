@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
 export default defineConfig({
-  base: "/globe-trek-interface/",
+  base: "./", // <-- yahan fix
   plugins: [react()],
   resolve: {
     alias: {
@@ -14,7 +14,5 @@ export default defineConfig({
     outDir: "dist",
   },
 });
-
-
 
 
