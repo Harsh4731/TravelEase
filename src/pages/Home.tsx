@@ -50,7 +50,7 @@ const Home = () => {
       image: parisImage,
       name: "Paris, France",
       description: "Fall in love with the City of Light, where romance and culture intertwine.",
-      price: "$1,499",
+      price: "₹2,49,999",
     },
   ];
 
