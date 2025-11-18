@@ -1,228 +1,156 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar as CalendarIcon, CheckCircle2 } from "lucide-react";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
-import { toast } from "sonner";
-
-const bookingSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
-  phone: z.string().min(10, "Phone number must be at least 10 digits"),
-  destination: z.string().min(1, "Please select a destination"),
-  travelers: z.string().min(1, "Please enter number of travelers"),
-});
-
-type BookingFormData = z.infer<typeof bookingSchema>;
+import { db } from "../firebase";
+import { collection, addDoc } from "firebase/firestore";
 
 const Booking = () => {
-  const [date, setDate] = useState<Date>();
-  const [isSubmitted, setIsSubmitted] = useState(false);
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    setValue,
-    watch,
-  } = useForm<BookingFormData>({
-    resolver: zodResolver(bookingSchema),
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    destination: "",
+    travelers: "",
+    message: "",
   });
 
-  const destination = watch("destination");
+  const [success, setSuccess] = useState(false);
 
-  const destinations = [
-    "Santorini, Greece",
-    "Bali, Indonesia",
-    "Swiss Alps",
-    "Dubai, UAE",
-    "Maldives",
-    "Paris, France",
-    "Mediterranean Cruise",
-    "Asian Highlights",
-    "European Explorer",
-  ];
-
-  const onSubmit = (data: BookingFormData) => {
-    if (!date) {
-      toast.error("Please select a travel date");
-      return;
-    }
-    console.log({ ...data, date });
-    setIsSubmitted(true);
-    toast.success("Your booking request has been sent!");
+  const handleChange = (e: any) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
-  if (isSubmitted) {
-    return (
-      <div className="min-h-screen smooth-scroll">
-        <Navbar />
-        <div className="container mx-auto px-4 pt-32 pb-20">
-          <div className="max-w-2xl mx-auto text-center space-y-6 fade-in">
-            <div className="inline-flex p-6 rounded-full bg-primary/10">
-              <CheckCircle2 className="h-20 w-20 text-primary" />
-            </div>
-            <h1 className="text-4xl font-bold">Booking Request Sent!</h1>
-            <p className="text-xl text-muted-foreground">
-              Thank you for choosing TravelEase. Our team will contact you shortly to confirm your booking details.
-            </p>
-            <Button onClick={() => setIsSubmitted(false)} size="lg" className="bg-primary hover:bg-primary/90">
-              Make Another Booking
-            </Button>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    try {
+      await addDoc(collection(db, "bookings"), formData);
+      setSuccess(true);
+      setFormData({
+        fullName: "",
+        email: "",
+        phone: "",
+        destination: "",
+        travelers: "",
+        message: "",
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   return (
-    <div className="min-h-screen smooth-scroll">
-      <Navbar />
-      
-      {/* Header */}
-      <section className="gradient-hero pt-32 pb-20 text-white">
-        <div className="container mx-auto px-4 text-center space-y-4 fade-in">
-          <h1 className="text-5xl font-bold">Book Your Trip</h1>
-          <p className="text-xl max-w-2xl mx-auto">
-            Fill out the form below and let us plan your perfect getaway
+    <div className="min-h-screen bg-gray-100 py-12 px-4">
+      <div className="max-w-2xl mx-auto bg-white shadow-lg rounded-xl p-8">
+        <h1 className="text-4xl font-bold mb-6 text-center text-blue-600">
+          Book Your Trip 🌍
+        </h1>
+
+        {success && (
+          <p className="bg-green-200 text-green-800 p-3 rounded mb-4 text-center animate-pulse">
+            Booking submitted successfully!
           </p>
-        </div>
-      </section>
+        )}
 
-      {/* Booking Form */}
-      <section className="container mx-auto px-4 -mt-8 pb-20">
-        <div className="max-w-2xl mx-auto">
-          <div className="bg-card rounded-lg shadow-lg p-8 border border-border fade-in">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              {/* Name */}
-              <div>
-                <Label htmlFor="name">Full Name *</Label>
-                <Input
-                  id="name"
-                  {...register("name")}
-                  placeholder="John Doe"
-                  className="mt-2"
-                />
-                {errors.name && (
-                  <p className="text-destructive text-sm mt-1">{errors.name.message}</p>
-                )}
-              </div>
-
-              {/* Email */}
-              <div>
-                <Label htmlFor="email">Email Address *</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  {...register("email")}
-                  placeholder="john@example.com"
-                  className="mt-2"
-                />
-                {errors.email && (
-                  <p className="text-destructive text-sm mt-1">{errors.email.message}</p>
-                )}
-              </div>
-
-              {/* Phone */}
-              <div>
-                <Label htmlFor="phone">Contact Number *</Label>
-                <Input
-                  id="phone"
-                  {...register("phone")}
-                  placeholder="+1 (555) 123-4567"
-                  className="mt-2"
-                />
-                {errors.phone && (
-                  <p className="text-destructive text-sm mt-1">{errors.phone.message}</p>
-                )}
-              </div>
-
-              {/* Destination */}
-              <div>
-                <Label htmlFor="destination">Destination *</Label>
-                <Select value={destination} onValueChange={(value) => setValue("destination", value)}>
-                  <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="Select a destination" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border-border z-50">
-                    {destinations.map((dest) => (
-                      <SelectItem key={dest} value={dest}>
-                        {dest}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.destination && (
-                  <p className="text-destructive text-sm mt-1">{errors.destination.message}</p>
-                )}
-              </div>
-
-              {/* Travel Date */}
-              <div>
-                <Label>Travel Date *</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal mt-2",
-                        !date && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {date ? format(date, "PPP") : <span>Pick a date</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 bg-popover border-border z-50" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={date}
-                      onSelect={setDate}
-                      disabled={(date) => date < new Date()}
-                      initialFocus
-                      className="pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              {/* Number of Travelers */}
-              <div>
-                <Label htmlFor="travelers">Number of Travelers *</Label>
-                <Input
-                  id="travelers"
-                  type="number"
-                  min="1"
-                  {...register("travelers")}
-                  placeholder="2"
-                  className="mt-2"
-                />
-                {errors.travelers && (
-                  <p className="text-destructive text-sm mt-1">{errors.travelers.message}</p>
-                )}
-              </div>
-
-              {/* Submit Button */}
-              <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground" size="lg">
-                Submit Booking Request
-              </Button>
-            </form>
+        <form onSubmit={handleSubmit} className="grid gap-4">
+          {/* Full Name */}
+          <div>
+            <label className="block mb-1 font-semibold text-gray-700">
+              Full Name *
+            </label>
+            <input
+              name="fullName"
+              value={formData.fullName}
+              onChange={handleChange}
+              className="border w-full p-3 rounded focus:ring-2 focus:ring-blue-400"
+              placeholder="Enter your full name"
+              required
+            />
           </div>
-        </div>
-      </section>
 
-      <Footer />
+          {/* Email */}
+          <div>
+            <label className="block mb-1 font-semibold text-gray-700">
+              Email *
+            </label>
+            <input
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="border w-full p-3 rounded focus:ring-2 focus:ring-blue-400"
+              placeholder="Enter your email"
+              required
+            />
+          </div>
+
+          {/* Phone */}
+          <div>
+            <label className="block mb-1 font-semibold text-gray-700">
+              Phone Number *
+            </label>
+            <input
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              className="border w-full p-3 rounded focus:ring-2 focus:ring-blue-400"
+              placeholder="Enter your phone number"
+              required
+            />
+          </div>
+
+          {/* Destination */}
+          <div>
+            <label className="block mb-1 font-semibold text-gray-700">
+              Destination *
+            </label>
+            <input
+              name="destination"
+              value={formData.destination}
+              onChange={handleChange}
+              className="border w-full p-3 rounded focus:ring-2 focus:ring-blue-400"
+              placeholder="Where do you want to go?"
+              required
+            />
+          </div>
+
+          {/* Travelers */}
+          <div>
+            <label className="block mb-1 font-semibold text-gray-700">
+              Number of Travelers *
+            </label>
+            <input
+              name="travelers"
+              value={formData.travelers}
+              onChange={handleChange}
+              className="border w-full p-3 rounded focus:ring-2 focus:ring-blue-400"
+              placeholder="How many travelers?"
+              required
+            />
+          </div>
+
+          {/* Message */}
+          <div>
+            <label className="block mb-1 font-semibold text-gray-700">
+              Special Requests / Message
+            </label>
+            <textarea
+              name="message"
+              value={formData.message}
+              onChange={handleChange}
+              rows={4}
+              className="border w-full p-3 rounded focus:ring-2 focus:ring-blue-400"
+              placeholder="Optional message"
+            ></textarea>
+          </div>
+
+          {/* Submit Button */}
+          <button
+            className="w-full bg-blue-600 text-white py-3 mt-2 rounded-lg text-lg font-semibold hover:bg-blue-700 transition"
+          >
+            Submit Booking
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

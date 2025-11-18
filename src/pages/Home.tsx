@@ -17,36 +17,42 @@ import parisImage from "@/assets/paris.jpg";
 const Home = () => {
   const destinations = [
     {
+    
       image: santoriniImage,
       name: "Santorini, Greece",
       description: "Experience the stunning sunsets and white-washed buildings of this iconic Greek island.",
       price: "₹1,09,999",
     },
     {
+      
       image: baliImage,
       name: "Bali, Indonesia",
       description: "Discover lush rice terraces, ancient temples, and pristine beaches in paradise.",
       price: "₹74,999",
     },
     {
+      
       image: switzerlandImage,
       name: "Swiss Alps",
       description: "Adventure awaits in the majestic mountains with breathtaking alpine views.",
       price: "₹1,49,999",
     },
     {
+      
       image: dubaiImage,
       name: "Dubai, UAE",
       description: "Experience luxury and innovation in this modern marvel of the Middle East.",
       price: "₹34,999",
     },
     {
+      
       image: maldivesImage,
       name: "Maldives",
       description: "Relax in overwater bungalows surrounded by crystal-clear turquoise waters.",
       price: "₹1,79,999",
     },
     {
+  
       image: parisImage,
       name: "Paris, France",
       description: "Fall in love with the City of Light, where romance and culture intertwine.",
